@@ -1,30 +1,21 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Table, Button, Modal, Form, Input, message } from "antd";
 import { NoticeStyled } from "./styled";
 import api from "@/utill/api";
-import { Editor } from "@toast-ui/react-editor";
-import "@toast-ui/editor/dist/toastui-editor.css";
-import { useRef } from "react";
-import dynamic from "next/dynamic";
-
+import ToastEditorWithRef from "../Editor";
 interface NoticeItem {
   key: string;
   title: string;
   content: string;
 }
-const ToastEditor = dynamic(
-  () => import("@toast-ui/react-editor").then((mod) => mod.Editor),
-  {
-    ssr: false,
-  }
-);
+
 const Notice = () => {
   const [notices, setNotices] = useState<NoticeItem[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingKey, setEditingKey] = useState<string | null>(null);
   const [form] = Form.useForm();
-  const editorRef = useRef<any>(null); // Toast Editor의 ref
+  const editorRef = useRef<any>(null);
 
   useEffect(() => {
     fetchNotices();
@@ -46,8 +37,14 @@ const Notice = () => {
 
   const handleOk = async () => {
     try {
-      const values = await form.validateFields();
-      const content = editorRef.current?.getInstance().getHTML();
+      const values = await form.validateFields(); // 제목 유효성 검사
+      const editorInstance = editorRef.current?.getInstance?.();
+      const content = editorInstance?.getHTML?.();
+      console.log(content, values.title);
+      if (!content || content === "<p><br></p>") {
+        message.error("내용을 입력해주세요.");
+        return;
+      }
 
       const payload = {
         title: values.title,
@@ -65,22 +62,29 @@ const Notice = () => {
       setIsModalOpen(false);
       form.resetFields();
       fetchNotices();
-    } catch (error) {
-      message.error("오류가 발생했습니다.");
+    } catch (err) {
+      // validateFields에서 에러가 발생하면 여기로 옴
+      console.error("폼 유효성 검사 실패", err);
+      message.error("필수 항목을 모두 입력해주세요.");
     }
   };
-
   const openAddModal = () => {
     setIsEditMode(false);
     form.resetFields();
     setIsModalOpen(true);
+    setTimeout(() => {
+      editorRef.current?.getInstance?.()?.setHTML("");
+    }, 0);
   };
 
   const openEditModal = (record: NoticeItem) => {
     setIsEditMode(true);
     setEditingKey(record.key);
-    form.setFieldsValue({ title: record.title, content: record.content });
+    form.setFieldsValue({ title: record.title });
     setIsModalOpen(true);
+    setTimeout(() => {
+      editorRef.current?.getInstance?.()?.setHTML(record.content || "");
+    }, 0);
   };
 
   const columns = [
@@ -123,6 +127,9 @@ const Notice = () => {
         onCancel={() => setIsModalOpen(false)}
         okText="저장"
         cancelText="취소"
+        styles={{
+          body: { maxHeight: "70vh", overflowY: "auto" },
+        }}
       >
         <Form form={form} layout="vertical">
           <Form.Item
@@ -132,15 +139,13 @@ const Notice = () => {
           >
             <Input />
           </Form.Item>
-
           <Form.Item label="내용">
-            <ToastEditor
+            <ToastEditorWithRef
               ref={editorRef}
-              initialValue=""
-              previewStyle="vertical"
+              initialValue="내용"
               height="300px"
+              previewStyle="vertical"
               initialEditType="wysiwyg"
-              useCommandShortcut={true}
             />
           </Form.Item>
         </Form>
