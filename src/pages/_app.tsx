@@ -9,6 +9,8 @@ import { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import { useRouter } from "next/router";
 import { Modal } from "antd";
+import { ThemeProvider } from "styled-components";
+import theme from "@/styles/theme";
 
 export default function App({ Component, pageProps }: AppProps) {
   const [notPc, setNotPc] = useState(false);
@@ -88,10 +90,12 @@ export default function App({ Component, pageProps }: AppProps) {
         <NotPc />
       ) : (
         <>
-          <Header />
-          <Template>
-            <Component {...pageProps} />
-          </Template>
+          <ThemeProvider theme={theme}>
+            <Header />
+            <Template>
+              <Component {...pageProps} />
+            </Template>
+          </ThemeProvider>
         </>
       )}
     </>
