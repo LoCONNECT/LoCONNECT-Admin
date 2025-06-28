@@ -43,6 +43,10 @@ export const sidebarMenus = createSidebarMenus([
     ],
   },
   {
+    key: "/approve",
+    label: "승인 관리",
+  },
+  {
     key: "/notice",
     label: "공지사항",
   },
