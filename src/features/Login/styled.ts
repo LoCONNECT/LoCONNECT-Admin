@@ -3,7 +3,7 @@ import styled from "styled-components";
 export const LoginStyled = styled.div`
   &.login_center {
     width: 100vw;
-    height: 85vh;
+    height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -59,6 +59,7 @@ export const LoginStyled = styled.div`
           }
 
           .login_login_btn {
+            margin-top: 40px;
             height: 52px;
             border-radius: 12px;
             border: 1px solid ${({ theme }) => theme.colors.mainColor};

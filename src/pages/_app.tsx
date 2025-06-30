@@ -11,12 +11,22 @@ import { useRouter } from "next/router";
 import { Modal } from "antd";
 import { ThemeProvider } from "styled-components";
 import theme from "@/styles/theme";
+import { useUserStore } from "@/store/useAdminStore";
 
 export default function App({ Component, pageProps }: AppProps) {
   const [notPc, setNotPc] = useState(false);
+  const router = useRouter();
+
+  const loadUserProfile = useUserStore((state) => state.loadUserProfile);
+
+  // 새로고침 시 토큰 기반으로 유저 정보 갱신
+  useEffect(() => {
+    loadUserProfile();
+  }, [loadUserProfile]);
+
+  const isLoginPage = router.pathname === "/login";
 
   const token = Cookies.get("accessToken");
-  const router = useRouter();
 
   // useEffect(() => {
   //   if (!token) router.push("/login");
@@ -91,10 +101,15 @@ export default function App({ Component, pageProps }: AppProps) {
       ) : (
         <>
           <ThemeProvider theme={theme}>
-            <Header />
-            <Template>
+            {/* 로그인 페이지가 아닐 때만 Header, Template 렌더 */}
+            {!isLoginPage && <Header />}
+            {!isLoginPage ? (
+              <Template>
+                <Component {...pageProps} />
+              </Template>
+            ) : (
               <Component {...pageProps} />
-            </Template>
+            )}
           </ThemeProvider>
         </>
       )}

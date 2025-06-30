@@ -12,9 +12,6 @@ const Login = () => {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
 
-  // zustand 함수
-  const setUser = useUserStore((state) => state.setUser);
-
   // 비밀번호 보이기/숨기기
   const togglePassword = () => {
     setShowPassword((prev) => !prev);
@@ -26,23 +23,17 @@ const Login = () => {
     onSubmit: async (values) => {
       try {
         // 로그인 요청(아이디랑 비밀번호 이런식으로 보냄 -> {id: '아이디', password: '비밀번호'})
-        const res = await api.post("/auth/login", values);
+        const res = await api.post("/auth/adminLogin", values);
 
-        // TODO: 현재 로그인되어있는 유저의 정보 보내주기
-        // const response = await axiosInstance.get("/user/me");
-
-        console.log("로그인", res.data);
-        // console.log("현재 로그인되어있는 사람", response.data);
-
+        // 로그인 실패 메시지
         if (res.data.message) {
           message.info(res.data.message);
           return; // 홈으로 이동 안 함
-        } else {
-          // Zustand store에 유저 정보 저장
-          // setUser(response.data);
-          setUser(res.data);
-          router.push("/");
         }
+
+        // 현재 로그인되어있는 유저 정보 Zustand에 저장 후 홈으로 이동
+        await useUserStore.getState().loadUserProfile();
+        router.push("/");
       } catch (e) {
         console.error("로그인 실패:", e);
       }
