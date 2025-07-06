@@ -26,7 +26,7 @@ export default function App({ Component, pageProps }: AppProps) {
 
   const isLoginPage = router.pathname === "/login";
 
-  const token = Cookies.get("accessToken");
+  // const token = Cookies.get("accessToken");
 
   // useEffect(() => {
   //   if (!token) router.push("/login");
