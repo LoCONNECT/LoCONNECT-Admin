@@ -1,7 +1,7 @@
 import TitleCompo from "@/components/TitleCompo";
 import { ApproveUserStyled } from "./styled";
 import api from "@/utill/api";
-import { Button, message, Modal, Table, Descriptions } from "antd";
+import { Button, message, Modal, Table, Descriptions, Input } from "antd";
 import { useEffect, useState } from "react";
 
 // 그냥 user에 있는 정보 다 보내주기
@@ -66,21 +66,23 @@ const ApproveUser = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [rejectModalOpen, setRejectModalOpen] = useState(false);
+  const [rejectReason, setRejectReason] = useState("");
 
   const fetchUsers = async () => {
     try {
-      // TODO: 해당하는 유저들 불러오기(승인 대기중인 유저만 불러오기)
+      // TODO: 해당하는 유저들 불러오기(승인 대기중인 유저 + 거절한 유저 정보 불러오기)
       const res = await api.get("/admin/users", {
         params: { status: "pending" },
       });
-      console.log(res.data, "승인 대기 중인 유저들");
+      console.log(res.data, "승인 대기 중이거나 거절당한 유저들");
       setUsers(res.data);
 
       // 더미 데이터 사용(더미데이터는 그냥 쓴거라서 그냥 해당 유저정보들 다 보내주면 됨)
       // setUsers(dummyUsers);
     } catch (error) {
       console.error(error);
-      message.error("승인 대기 중인 유저 목록을 불러오는데 실패했습니다.");
+      message.error("유저 목록을 불러오는데 실패했습니다.");
     }
   };
 
@@ -103,15 +105,27 @@ const ApproveUser = () => {
     }
   };
 
-  // 회원 거절
-  const handleReject = async (userId: number) => {
+  // 회원 거절 (거절 사유 작성)
+  const openRejectModal = (user: any) => {
+    setSelectedUser(user);
+    setRejectReason("");
+    setRejectModalOpen(true);
+  };
+
+  const confirmReject = async () => {
+    if (!rejectReason.trim()) {
+      message.warning("거절 사유를 작성해주세요.");
+      return;
+    }
     try {
-      // TODO: 회원가입 거절
-      await api.patch(`/admin/users/${userId}/accept`, {
+      console.log(rejectReason, "이유", selectedUser.id);
+      await api.patch(`/admin/users/${selectedUser.id}/accept`, {
         status: "reject",
+        reason: rejectReason,
       });
       message.success("거절 완료되었습니다.");
-      setUsers((prev) => prev.filter((u) => u.id !== userId));
+      setRejectModalOpen(false);
+      fetchUsers();
     } catch (error) {
       console.error(error);
       message.error("거절 처리에 실패했습니다.");
@@ -122,6 +136,7 @@ const ApproveUser = () => {
   const columns = [
     { title: "이름", dataIndex: "name", key: "name" },
     { title: "전화번호", dataIndex: "phone", key: "phone" },
+    { title: "이메일", dataIndex: "email", key: "email" },
     {
       title: "회원유형",
       dataIndex: "role",
@@ -134,6 +149,13 @@ const ApproveUser = () => {
           : "인플루언서",
     },
     {
+      title: "상태",
+      dataIndex: "acceptStatus",
+      key: "acceptStatus",
+      render: (status: string) =>
+        status === "pending" ? "대기" : status === "accept" ? "승인" : "거절",
+    },
+    {
       title: "관리",
       key: "actions",
       render: (_: any, record: any) => (
@@ -143,7 +165,7 @@ const ApproveUser = () => {
             onClick={(e) => {
               e.stopPropagation();
               Modal.confirm({
-                title: "승인하시겠습니까?",
+                title: "해당 유저를 승인하시겠습니까?",
                 centered: true,
                 onOk: () => handleApprove(record.id),
               });
@@ -155,11 +177,7 @@ const ApproveUser = () => {
             danger
             onClick={(e) => {
               e.stopPropagation();
-              Modal.confirm({
-                title: "거절하시겠습니까?",
-                centered: true,
-                onOk: () => handleReject(record.id),
-              });
+              openRejectModal(record);
             }}
           >
             거절
@@ -172,6 +190,7 @@ const ApproveUser = () => {
   // 추가정보
   const renderExtraInfo = (user: any) => {
     const { extraInfo } = user;
+    if (!extraInfo) return null;
     if (user.role === "biz") {
       // 소상공인 추가 정보
       return (
@@ -279,6 +298,8 @@ const ApproveUser = () => {
           },
         })}
       />
+
+      {/* 상세 정보 모달 */}
       <Modal
         open={modalOpen}
         onCancel={() => setModalOpen(false)}
@@ -306,6 +327,24 @@ const ApproveUser = () => {
             {renderExtraInfo(selectedUser)}
           </Descriptions>
         )}
+      </Modal>
+
+      {/* 거절 사유 작성 모달 */}
+      <Modal
+        open={rejectModalOpen}
+        onCancel={() => setRejectModalOpen(false)}
+        onOk={confirmReject}
+        centered
+        okText="거절하기"
+        cancelText="취소"
+      >
+        <p>거절 사유를 작성해주세요.</p>
+        <Input.TextArea
+          value={rejectReason}
+          onChange={(e) => setRejectReason(e.target.value)}
+          rows={4}
+          placeholder="거절 사유 입력"
+        />
       </Modal>
     </ApproveUserStyled>
   );
