@@ -70,18 +70,17 @@ const ApproveUser = () => {
   const fetchUsers = async () => {
     try {
       // TODO: 해당하는 유저들 불러오기(승인 대기중인 유저만 불러오기)
-      // const res = await api.get("/admin/users");
-      // 승인 대기중인 유저만 필터
-      // const pendingUsers = res.data.users.filter(
-      //   (user: any) => user.acceptStatus === "pending"
-      // );
-      // setUsers(pendingUsers);
+      const res = await api.get("/admin/users", {
+        params: "pending",
+      });
+      console.log(res.data, "승인 대기 중인 유저들");
+      setUsers(res.data);
 
       // 더미 데이터 사용
-      setUsers(dummyUsers);
+      // setUsers(dummyUsers);
     } catch (error) {
       console.error(error);
-      message.error("유저 목록을 불러오는데 실패했습니다.");
+      message.error("승인 대기 중인 유저 목록을 불러오는데 실패했습니다.");
     }
   };
 
