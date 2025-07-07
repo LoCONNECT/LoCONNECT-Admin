@@ -71,12 +71,12 @@ const ApproveUser = () => {
     try {
       // TODO: 해당하는 유저들 불러오기(승인 대기중인 유저만 불러오기)
       const res = await api.get("/admin/users", {
-        params: "pending",
+        params: { status: "pending" },
       });
       console.log(res.data, "승인 대기 중인 유저들");
       setUsers(res.data);
 
-      // 더미 데이터 사용
+      // 더미 데이터 사용(더미데이터는 그냥 쓴거라서 그냥 해당 유저정보들 다 보내주면 됨)
       // setUsers(dummyUsers);
     } catch (error) {
       console.error(error);
