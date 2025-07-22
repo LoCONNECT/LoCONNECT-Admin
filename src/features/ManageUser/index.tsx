@@ -197,23 +197,21 @@ const ManageUser = () => {
   };
 
   return (
-    <ManangeUserStyled className={clsx("usermanage_wrap")}>
-      <div className="usermanage_title_box">
-        <TitleCompo title="회원 관리" />
-      </div>
+    <ManangeUserStyled className={clsx("manageuser_wrap")}>
+      <TitleCompo title="회원 관리" />
 
-      <div className="usermanage_info">
+      <div className="manageuser_info">
         <Select
-          className="usermanage_search_select"
           value={selectSearch}
           options={searchOptions}
+          style={{ width: 100 }}
           onChange={(value) => setSelectSearch(value as "name" | "role")}
         />
         <Search
           placeholder="검색어 입력"
           allowClear
           onSearch={onSearch}
-          style={{ width: 200, marginLeft: 8 }}
+          style={{ width: 200, marginLeft: 4 }}
         />
       </div>
 
