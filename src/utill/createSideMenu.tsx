@@ -35,12 +35,6 @@ export const sidebarMenus = createSidebarMenus([
   {
     key: "/users",
     label: "회원 관리",
-    children: [
-      {
-        key: "/users/manage",
-        label: "회원 정보",
-      },
-    ],
   },
   {
     key: "/approve",
