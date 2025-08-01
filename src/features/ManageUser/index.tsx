@@ -37,7 +37,7 @@ const ManageUser = () => {
             searchWord: word.trim(), // 검색어(검색어가 빈값인 경우 승인된 회원만 출력)
           },
         });
-        setUsers(res.data);
+        setUsers(res.data.users);
       } catch (e) {
         console.error("회원 불러오기 실패: ", e);
         notification.error({
