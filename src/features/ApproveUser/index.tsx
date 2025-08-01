@@ -76,7 +76,7 @@ const ApproveUser = () => {
         params: { status: "pending" },
       });
       console.log(res.data, "승인 대기 중이거나 거절당한 유저들");
-      setUsers(res.data);
+      setUsers(res.data.users);
 
       // 더미 데이터 사용(더미데이터는 그냥 쓴거라서 그냥 해당 유저정보들 다 보내주면 됨)
       // setUsers(dummyUsers);
